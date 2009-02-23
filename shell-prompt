@@ -21,7 +21,7 @@ chomp(my $cols = `tput cols`);
 my $vcs;
 if (-d '_darcs') {
     $vcs = 'd';
-    $vcs .= '*' if `darcs whatsnew -s` !~ /^No changes/;
+    $vcs .= '*' if `darcs whatsnew` !~ /^No changes/;
 }
 elsif (-d '.git') {
     $vcs = 'g';
