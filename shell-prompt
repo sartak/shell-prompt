@@ -1,0 +1,62 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+# Add this to your zshrc:
+# precmd () {
+#     PROMPT=`shell-prompt`
+# }
+
+# Add this to your bashrc:
+# PS1='$(shell-prompt)'
+
+$| = 1;
+
+my $user = $ENV{USER};
+(my $pwd = $ENV{PWD}) =~ s{^/(?:Users|home)/\Q$user\E(/|$)}{~$1};
+chomp(my $host = `hostname -s`);
+chomp(my $cols = `tput cols`);
+
+# VCS info
+my $vcs;
+if (-d '_darcs') {
+    $vcs = 'd';
+    $vcs .= '*' if `darcs whatsnew -sq` !~ /^No changes/;
+}
+elsif (-d '.git') {
+    $vcs = 'g';
+    my $status = `git status -q --untracked-files=no`;
+    $vcs .= '*' if $status !~ /nothing to commit/;
+    $vcs .= ":$1" if $status =~ /On branch (.*)/;
+    $vcs =~ s/\*:/*/;
+}
+
+my ($lhs_length, $rhs_length);
+sub calc_length {
+    $lhs_length = 2 + length($pwd);
+    $lhs_length += 3 + length($vcs) if $vcs;
+    $rhs_length = 4 + length($user) + length($host);
+    $lhs_length + $rhs_length;
+}
+
+# Collapse long directory names into one letter abbreviations from the top down
+while (calc_length > $cols) {
+    $pwd =~ s{/([^/])[^/]+/}{/$1/}
+        or last;
+}
+
+# pwd
+print "\e[1;30m(\e[33m$pwd\e[30m)";
+
+# vcs
+print "-(\e[0;36m$vcs\e[1;30m)" if $vcs;
+
+# dashes
+print ('-' x ($cols - ($lhs_length + $rhs_length)));
+
+# user@host
+print "\e[1;30m(\e[0;32m$user\@$host\e[1;30m)-";
+
+# newline and $
+print "\e[m\n\$ ";
+
