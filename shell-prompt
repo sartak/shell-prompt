@@ -3,9 +3,10 @@ use strict;
 use warnings;
 
 # Add this to your zshrc:
-# precmd () {
+# function shell_prompt_precmd() {
 #     PROMPT=`shell-prompt`
 # }
+# precmd_functions+=(shell_prompt_precmd)
 
 # Add this to your bashrc:
 # PS1='$(shell-prompt)'
