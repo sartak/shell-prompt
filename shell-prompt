@@ -29,6 +29,7 @@ elsif (-d '.git') {
     my $status = `git status`;
     $vcs .= '*' if $status !~ /nothing to commit/;
     $vcs .= ":$1" if $status =~ /On branch (.*)/;
+    $vcs .= "+$1" if $status =~ /Your branch is ahead .* by (\d+) commit/;
     $vcs =~ s/\*:/*/;
 }
 
