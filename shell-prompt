@@ -14,17 +14,17 @@ use warnings;
 $| = 1;
 
 my $user = $ENV{USER};
-(my $pwd = $ENV{PWD}) =~ s{^/(?:Users|home)/\Q$user\E(/|$)}{~$1};
-chomp(my $host = `hostname -s`);
-chomp(my $cols = `tput cols`);
+( my $pwd = $ENV{PWD} ) =~ s{^/(?:Users|home)/\Q$user\E(/|$)}{~$1};
+chomp( my $host = `hostname -s` );
+chomp( my $cols = `tput cols` );
 
 # VCS info
 my $vcs;
-if (-d '_darcs') {
+if ( -d '_darcs' ) {
     $vcs = 'd';
     $vcs .= '*' if `darcs whatsnew` !~ /^No changes/;
 }
-elsif (-d '.git') {
+elsif ( -d '.git' ) {
     $vcs = 'g';
     my $status = `git status`;
 
@@ -32,14 +32,15 @@ elsif (-d '.git') {
 
     $vcs .= ":$1" if $status =~ /On branch (.*)/;
 
-    $vcs .= "+$1" if $status =~ /Your branch is ahead .* by (\d+) commit/;
-    $vcs .= "-$1" if $status =~ /Your branch is behind .* by (\d+) commit/;
+    $vcs .= "+$1"    if $status =~ /Your branch is ahead .* by (\d+) commit/;
+    $vcs .= "-$1"    if $status =~ /Your branch is behind .* by (\d+) commit/;
     $vcs .= "+$1-$2" if $status =~ /and have (\d+) and (\d+) different commit.* each, respectively/;
 
     $vcs =~ s/\*:/*/;
 }
 
-my ($lhs_length, $rhs_length);
+my ( $lhs_length, $rhs_length );
+
 sub calc_length {
     $lhs_length = 2 + length($pwd);
     $lhs_length += 3 + length($vcs) if $vcs;
@@ -48,9 +49,9 @@ sub calc_length {
 }
 
 # Collapse long directory names into one letter abbreviations from the top down
-while (calc_length > $cols) {
+while ( calc_length > $cols ) {
     $pwd =~ s{/([^/])[^/]+/}{/$1/}
-        or last;
+      or last;
 }
 
 # pwd
@@ -60,7 +61,7 @@ print "\e[1;30m(\e[33m$pwd\e[30m)";
 print "-(\e[0;36m$vcs\e[1;30m)" if $vcs;
 
 # dashes
-print ('-' x ($cols - ($lhs_length + $rhs_length)));
+print( '-' x ( $cols - ( $lhs_length + $rhs_length ) ) );
 
 # user@host
 print "\e[1;30m(\e[0;32m$user\@$host\e[1;30m)-";
