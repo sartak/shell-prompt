@@ -38,6 +38,29 @@ elsif ( -d '.git' ) {
 
     $vcs =~ s/\*:/*/;
 }
+elsif ( -d '.svn' ) {
+    $vcs = 's';
+
+    my %info = map { m/^([^:]+): (.*)$/; ( $1, $2 ); } `svn info`;
+
+    my $url                   = $info{'URL'};
+    my $repo_root             = $info{'Repository Root'};
+    my $revision              = $info{'Revision'};
+    my $last_changed_revision = $info{'Last Changed Rev'};
+    my $last_changed_by       = $info{'Last Changed Author'};
+
+    ( my $path = $url ) =~ s!^\Q$repo_root!!;
+    my ( undef, $branch, $cwd ) = split( m!/!, "$path/", 3 );
+    ( my $updir = $cwd ) =~ s![^/]+!..!g;
+
+    my %status = map { m/^(.)/; ( $1 => 1 ); } `cd $updir; svn status`;
+
+    $vcs .= join( '' => sort keys %status ) || '*';
+    $vcs .= ":$branch\@r$revision";
+    $vcs .= "($last_changed_by\@r$last_changed_revision)" if $revision != $last_changed_revision;
+
+    $vcs =~ s/\*:/*/;
+}
 
 my ( $lhs_length, $rhs_length );
 
