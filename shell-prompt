@@ -39,9 +39,13 @@ elsif (-d '.git') {
     $vcs =~ s/\*:/*/;
 }
 
+my $nested;
+$nested = ($ENV{SHLVL}-1).'x' if $ENV{SHLVL} > 1;
+
 my ($lhs_length, $rhs_length);
 sub calc_length {
     $lhs_length = 2 + length($pwd);
+    $lhs_length += length($nested) if $nested;
     $lhs_length += 3 + length($vcs) if $vcs;
     $rhs_length = 4 + length($user) + length($host);
     $lhs_length + $rhs_length;
@@ -52,6 +56,9 @@ while (calc_length > $cols) {
     $pwd =~ s{/([^/])[^/]+/}{/$1/}
         or last;
 }
+
+# nest level
+print "\e[1;31m$nested\e[m" if $nested;
 
 # pwd
 print "\e[1;30m(\e[33m$pwd\e[30m)";
