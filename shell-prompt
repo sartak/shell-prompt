@@ -26,11 +26,16 @@ if (-d '.git') {
 
     $vcs .= '*' if $status !~ /nothing to commit/;
 
-    $vcs .= ":$1" if $status =~ /On branch (.*)/;
-
-    $vcs .= "+$1" if $status =~ /Your branch is ahead .* by (\d+) commit/;
-    $vcs .= "-$1" if $status =~ /Your branch is behind .* by (\d+) commit/;
-    $vcs .= "+$1-$2" if $status =~ /and have (\d+) and (\d+) different commit.* each, respectively/;
+    if ($status =~ /On branch (.*)/) {
+        $vcs .= ":$1";
+        $vcs .= "+$1" if $status =~ /Your branch is ahead .* by (\d+) commit/;
+        $vcs .= "-$1" if $status =~ /Your branch is behind .* by (\d+) commit/;
+        $vcs .= "+$1-$2" if $status =~ /and have (\d+) and (\d+) different commit.* each, respectively/;
+    }
+    else {
+        $vcs .= ':' . `git describe`;
+        chomp $vcs;
+    }
 
     $vcs =~ s/\*:/*/;
 }
