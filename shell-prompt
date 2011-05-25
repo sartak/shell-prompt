@@ -33,7 +33,7 @@ if (-d '.git') {
         $vcs .= "+$1-$2" if $status =~ /and have (\d+) and (\d+) different commit.* each, respectively/;
     }
     else {
-        $vcs .= ':' . `git describe`;
+        $vcs .= ':' . `git describe --tags`;
         chomp $vcs;
     }
 
