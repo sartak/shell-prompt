@@ -18,6 +18,21 @@ my $user = $ENV{USER};
 chomp(my $host = `hostname -s`);
 chomp(my $cols = `tput cols`);
 
+my $battery;
+my $battery_file = "$ENV{HOME}/.battery" ;
+if (-M $battery_file >= 0.001) {
+    chomp($battery = `battery`);
+    $battery =~ s/\.\d*//;
+    $battery =~ s/%//;
+
+    open my $handle, '>', $battery_file;
+    print $handle $battery;
+}
+else {
+    open my $handle, '<', $battery_file;
+    chomp($battery = <$handle>);
+}
+
 # VCS info
 my $vcs;
 if (-d '.git') {
@@ -48,6 +63,7 @@ sub calc_length {
     $lhs_length = 2 + length($pwd);
     $lhs_length += length($nested) if $nested;
     $lhs_length += 3 + length($vcs) if $vcs;
+    $lhs_length += 4 + length($battery);
     $rhs_length = 4 + length($user) + length($host);
     $lhs_length + $rhs_length;
 }
@@ -66,6 +82,10 @@ print "\e[1;30m(\e[33m$pwd\e[30m)";
 
 # vcs
 print "-(\e[0;36m$vcs\e[1;30m)" if $vcs;
+
+# battery
+my $battery_color = $battery < 20 ? "\e[1;31m" : $battery < 80 ? "\e[0;33m" : "\e[0;32m";
+print "-[$battery_color$battery%%\e[1;30m]" if $battery;
 
 # dashes
 print ('-' x ($cols - ($lhs_length + $rhs_length)));
