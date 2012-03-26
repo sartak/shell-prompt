@@ -35,10 +35,9 @@ else {
 
 # VCS info
 my $vcs;
-if (-d '.git') {
+my $status = `git status 2>&1`;
+if (!$?) {
     $vcs = 'g';
-    my $status = `git status`;
-
     $vcs .= '*' if $status !~ /nothing to commit/;
 
     if ($status =~ /On branch (.*)/) {
